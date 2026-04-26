@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="dark light"/>
+  <title th:text="${event.eventName} + ' – VGD'">Event Detail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; font-size: 14px; background: #f4f4f7; color: #1a1a2e; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    .breadcrumb { font-size: 12px; color: #94a3b8; margin-bottom: 1.5rem; display: flex; gap: 6px; align-items: center; }
+    .breadcrumb a { color: #5a7fc9; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 12px; }
+    .header-left { display: flex; flex-direction: column; gap: 6px; }
+    .header-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #5a7fc9; }
+    .header-title { font-family: 'Rajdhani', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1a1a2e; line-height: 1; }
+    .header-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; width: fit-content; }
+    .header-badge.open     { background: #d1fae5; color: #065f46; }
+    .header-badge.upcoming { background: #e0f2fe; color: #075985; }
+    .header-badge.past     { background: #f1f5f9; color: #64748b; }
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; border-radius: 6px; border: none; cursor: pointer; transition: opacity 0.15s; }
+    .btn-ghost  { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-ghost:hover  { background: #e2e8f0; }
+    .btn-export { background: #1d9e75; color: #fff; }
+    .btn-export:hover { opacity: 0.85; }
+    .btn-warn   { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .btn-warn:hover   { background: #fde68a; }
+
+    /* Top grid: event info + stats */
+    .top-grid { display: grid; grid-template-columns: 1fr 280px; gap: 16px; margin-bottom: 1.5rem; }
+
+    .info-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; }
+    .card-title { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+    .meta-row { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f8fafc; font-size: 13px; }
+    .meta-row:last-child { border-bottom: none; }
+    .meta-label { font-weight: 500; color: #475569; min-width: 90px; flex-shrink: 0; }
+    .meta-value { color: #64748b; }
+
+    .stats-col { display: flex; flex-direction: column; gap: 12px; }
+    .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 4px; }
+    .stat-val { font-family: 'Rajdhani', sans-serif; font-size: 36px; font-weight: 700; color: #1a1a2e; line-height: 1; }
+    .stat-lbl { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #94a3b8; }
+
+    /* Progress bar */
+    .progress-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+    .progress-row { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
+    .bar-bg { background: #f1f5f9; border-radius: 4px; height: 8px; }
+    .bar-fill { background: #5a7fc9; height: 8px; border-radius: 4px; max-width: 100%; }
+    .bar-fill.almost { background: #f59e0b; }
+    .bar-fill.full    { background: #ef4444; }
+
+    /* Members table */
+    .table-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .table-section-title { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #1a1a2e; }
+    .search-input { padding: 8px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; color: #1a1a2e; outline: none; width: 240px; }
+    .search-input::placeholder { color: #94a3b8; }
+    .search-input:focus { border-color: #5a7fc9; }
+
+    .table-wrap { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 11px 14px; text-align: left; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody td { padding: 10px 14px; vertical-align: middle; color: #1a1a2e; font-size: 13px; }
+    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+    .badge-yes  { background: #d1fae5; color: #065f46; }
+    .badge-no   { background: #f1f5f9; color: #64748b; }
+    .badge-game { background: #e0f2fe; color: #075985; border-radius: 20px; padding: 2px 10px; }
+    .table-footer { padding: 10px 14px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; }
+
+    .empty-state { text-align: center; padding: 3rem 2rem; }
+    .empty-state h3 { font-family: 'Rajdhani', sans-serif; font-size: 18px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .empty-state p { font-size: 13px; color: #94a3b8; }
+
+    /* Dark mode */
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b0c10; color: #e8eaf0; }
+      .breadcrumb { color: #6b7280; }
+      .breadcrumb a { color: #5a7fc9; }
+      .page-header { border-bottom-color: rgba(255,255,255,0.07); }
+      .header-title { color: #fff; }
+      .header-badge.open     { background: rgba(29,158,117,0.2); color: #6ee7b7; }
+      .header-badge.upcoming { background: rgba(14,165,233,0.15); color: #7dd3fc; }
+      .header-badge.past     { background: rgba(255,255,255,0.05); color: #6b7280; }
+      .btn-ghost { background: #1c1e27; color: #a0aec0; border-color: rgba(255,255,255,0.1); }
+      .btn-ghost:hover { background: #252730; }
+      .btn-warn { background: rgba(201,133,90,0.15); color: #f6ad55; border-color: rgba(201,133,90,0.3); }
+      .btn-warn:hover { background: rgba(201,133,90,0.25); }
+      .info-card, .stat-card, .progress-card, .table-wrap { background: #13141a; border-color: rgba(255,255,255,0.07); }
+      .card-title { color: #6b7280; border-bottom-color: rgba(255,255,255,0.05); }
+      .meta-row { border-bottom-color: rgba(255,255,255,0.04); }
+      .meta-label { color: #a0aec0; }
+      .meta-value { color: #6b7280; }
+      .stat-val { color: #fff; }
+      .progress-row { color: #6b7280; }
+      .bar-bg { background: rgba(255,255,255,0.07); }
+      .table-section-title { color: #fff; }
+      .search-input { background: #13141a; border-color: rgba(255,255,255,0.13); color: #e8eaf0; }
+      .search-input::placeholder { color: #6b7280; }
+      thead th { color: #6b7280; border-bottom-color: rgba(255,255,255,0.07); }
+      tbody tr { border-bottom-color: rgba(255,255,255,0.05); }
+      tbody tr:hover { background: #1c1e27; }
+      tbody td { color: #e8eaf0; }
+      .badge-yes  { background: rgba(29,158,117,0.2); color: #6ee7b7; }
+      .badge-no   { background: rgba(255,255,255,0.05); color: #6b7280; }
+      .badge-game { background: rgba(14,165,233,0.15); color: #7dd3fc; }
+      .table-footer { border-top-color: rgba(255,255,255,0.05); color: #6b7280; }
+      .empty-state h3, .empty-state p { color: #6b7280; }
+    }
+
+    @media (max-width: 700px) {
+      .top-grid { grid-template-columns: 1fr; }
+      .stats-col { flex-direction: row; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="breadcrumb">
+    <a th:href="@{/}">Dashboard</a>
+    <span>&#x203A;</span>
+    <a th:href="@{/events/list}">Events</a>
+    <span>&#x203A;</span>
+    <span th:text="${event.eventName}">Event</span>
+  </div>
+
+  <div class="page-header">
+    <div class="header-left">
+      <span class="header-tag">PSU IT Club &nbsp;·&nbsp; Event Detail</span>
+      <h1 class="header-title" th:text="${event.eventName}">Event Name</h1>
+      <span class="header-badge open"     th:if="${isOpen}">Open for Registration</span>
+      <span class="header-badge upcoming" th:if="${!isOpen and event.eventDate != null and !#temporals.createNow().toLocalDate().isAfter(event.eventDate)}">Upcoming</span>
+      <span class="header-badge past"     th:if="${event.eventDate == null or #temporals.createNow().toLocalDate().isAfter(event.eventDate)}">Past</span>
+    </div>
+    <div class="header-actions">
+      <a th:href="@{/events/list}" class="btn btn-ghost">&#x2190; Events</a>
+      <a th:href="@{/export/event(eventId=${event.eventId})}" class="btn btn-export">&#x2193; Export Excel</a>
+      <a th:href="@{/events/showFormForUpdate(eventId=${event.eventId})}" class="btn btn-warn">Edit Event</a>
+    </div>
+  </div>
+
+  <!-- Event info + stats -->
+  <div class="top-grid">
+    <div class="info-card">
+      <p class="card-title">Event info</p>
+      <div class="meta-row">
+        <span class="meta-label">Date</span>
+        <span class="meta-value" th:text="${event.eventDate}">--</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Time</span>
+        <span class="meta-value" th:text="${event.startTime} + ' – ' + ${event.endTime}">--</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Location</span>
+        <span class="meta-value" th:text="${event.location}">--</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Price</span>
+        <span class="meta-value" th:text="'$' + ${event.price}">--</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Capacity</span>
+        <span class="meta-value" th:text="${event.capacity}">150</span>
+      </div>
+      <div class="meta-row" th:if="${event.description != null and !event.description.isEmpty()}">
+        <span class="meta-label">Notes</span>
+        <span class="meta-value" th:text="${event.description}">--</span>
+      </div>
+    </div>
+
+    <div class="stats-col">
+      <div class="stat-card">
+        <span class="stat-val" th:text="${registeredCount}">0</span>
+        <span class="stat-lbl">Registered</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" th:text="${spotsRemaining}">150</span>
+        <span class="stat-lbl">Spots Left</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-card">
+    <div class="progress-row">
+      <span th:text="${registeredCount} + ' of ' + ${event.capacity} + ' spots filled'">0 of 150 spots filled</span>
+      <span th:text="${event.capacity > 0 ? (registeredCount * 100 / event.capacity) : 0} + '%'">0%</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fill"
+           th:classappend="${spotsRemaining == 0 ? 'full' : (spotsRemaining <= 10 ? 'almost' : '')}"
+           th:style="'width: ' + ${event.capacity > 0 ? (registeredCount * 100 / event.capacity) : 0} + '%'">
+      </div>
+    </div>
+  </div>
+
+  <!-- Registered members table -->
+  <div class="table-section-header">
+    <span class="table-section-title">Registered Members</span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search..." onkeyup="filterTable()"/>
+  </div>
+
+  <div class="table-wrap">
+    <table id="regTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Age Range</th>
+          <th>Best Game</th>
+          <th>System</th>
+          <th>Tournament</th>
+          <th>Guardian</th>
+          <th>Registered On</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:if="${registrations.isEmpty()}">
+          <td colspan="11">
+            <div class="empty-state">
+              <h3>No registrations yet</h3>
+              <p>No one has registered for this event.</p>
+            </div>
+          </td>
+        </tr>
+        <tr th:each="reg, stat : ${registrations}">
+          <td th:text="${stat.count}">1</td>
+          <td th:text="${reg.member?.firstName}">--</td>
+          <td th:text="${reg.member?.lastName}">--</td>
+          <td th:text="${reg.member?.email}">--</td>
+          <td th:text="${reg.member?.phoneNumber}">--</td>
+          <td th:text="${reg.member?.ageRange}">--</td>
+          <td><span class="badge badge-game" th:text="${reg.member?.bestGame}">--</span></td>
+          <td th:text="${reg.member?.gamingSystem}">--</td>
+          <td>
+            <span class="badge badge-yes" th:if="${reg.member?.joinTournament == 'yes'}">Yes</span>
+            <span class="badge badge-no"  th:unless="${reg.member?.joinTournament == 'yes'}" th:text="${reg.member?.joinTournament}">--</span>
+          </td>
+          <td th:text="${reg.member?.guardianName}">--</td>
+          <td th:text="${reg.registrationDate != null ? reg.registrationDate.toLocalDate() : '--'}">--</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="table-footer" th:text="'Showing ' + ${registeredCount} + ' registrations'">Showing 0 registrations</div>
+  </div>
+
+</div>
+<script>
+  function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#regTable tbody tr').forEach(row => {
+      row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>

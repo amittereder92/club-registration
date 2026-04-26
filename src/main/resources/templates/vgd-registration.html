@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="dark light"/>
+  <title>VGD Registration</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: 'DM Sans', sans-serif; font-size: 14px; background: #f4f4f7; color: #1a1a2e; }
+
+    .wrap { max-width: 700px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+    .breadcrumb { font-size: 12px; color: #94a3b8; margin-bottom: 1.5rem; display: flex; gap: 6px; align-items: center; }
+    .breadcrumb a { color: #5a7fc9; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* Event header card */
+    .event-header { background: #1a1a2e; border-radius: 12px; padding: 2rem; margin-bottom: 1.25rem; position: relative; overflow: hidden; }
+    .event-header::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .event-header-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #5a7fc9; }
+    .event-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #5a7fc9; margin-bottom: 4px; position: relative; }
+    .event-title { font-family: 'Rajdhani', sans-serif; font-size: 32px; font-weight: 700; color: #fff; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; position: relative; }
+    .event-meta { position: relative; display: flex; flex-direction: column; gap: 5px; }
+    .event-meta-row { font-size: 13px; color: #a0aec0; display: flex; gap: 8px; }
+    .event-meta-label { color: #5a7fc9; font-weight: 500; min-width: 80px; flex-shrink: 0; }
+
+    /* Closed banner */
+    .closed-banner { background: #fee2e2; border: 1px solid #fca5a5; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; text-align: center; }
+    .closed-banner h3 { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: #991b1b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .closed-banner p { font-size: 13px; color: #b91c1c; }
+
+    /* Progress / spots */
+    .progress-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; margin-bottom: 1.25rem; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .progress-label { font-size: 12px; color: #64748b; }
+    .progress-count { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; color: #1a1a2e; }
+    .progress-count span { font-size: 13px; font-weight: 400; color: #94a3b8; }
+    .bar-bg { background: #f1f5f9; border-radius: 4px; height: 7px; }
+    .bar-fill { background: #5a7fc9; height: 7px; border-radius: 4px; max-width: 100%; transition: width 0.3s; }
+    .bar-fill.almost-full { background: #f59e0b; }
+    .bar-fill.full { background: #ef4444; }
+    .progress-notice { font-size: 12px; color: #64748b; margin-top: 8px; }
+    .spots-remaining { color: #1d9e75; font-weight: 500; }
+    .spots-low { color: #f59e0b; font-weight: 500; }
+    .spots-none { color: #ef4444; font-weight: 500; }
+
+    /* Form sections */
+    .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .section-title { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.25rem; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .label { display: block; font-size: 12px; font-weight: 500; color: #475569; margin-bottom: 5px; }
+    .label .req { color: #e05252; margin-left: 2px; }
+    .label .hint { font-weight: 400; color: #94a3b8; font-style: italic; font-size: 11px; display: block; margin-top: 2px; }
+    .row   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+
+    input[type=text], input[type=email], input[type=tel], select {
+      width: 100%; padding: 9px 12px; font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      background: #f8fafc; border: 1px solid #cbd5e1;
+      border-radius: 8px; color: #1a1a2e; outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus { border-color: #5a7fc9; background: #fff; }
+    input::placeholder { color: #94a3b8; }
+    select { cursor: pointer; }
+
+    .inline-radio { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+    .inline-radio label { display: flex; align-items: center; gap: 7px; font-size: 14px; color: #1a1a2e; cursor: pointer; }
+    .inline-radio input[type=radio] { margin: 0; width: 15px; height: 15px; accent-color: #5a7fc9; cursor: pointer; }
+
+    .legal-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem 1.25rem; font-size: 12px; color: #64748b; line-height: 1.7; margin-bottom: 1rem; max-height: 180px; overflow-y: auto; }
+    .legal-box h4 { font-size: 12px; font-weight: 600; color: #334155; margin: 10px 0 3px; }
+    .legal-box h4:first-child { margin-top: 0; }
+    .legal-box p { margin: 0 0 6px; }
+
+    .accept-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #1a1a2e; margin-bottom: 1.5rem; line-height: 1.5; }
+    .accept-row input[type=checkbox] { margin: 3px 0 0; cursor: pointer; width: 15px; height: 15px; accent-color: #5a7fc9; flex-shrink: 0; }
+
+    .submit-btn { width: 100%; padding: 14px; font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; background: #5a7fc9; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.15s; }
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:disabled { background: #94a3b8; cursor: not-allowed; opacity: 1; }
+
+    /* Dark mode */
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b0c10; color: #e8eaf0; }
+      .breadcrumb { color: #6b7280; }
+      .breadcrumb a { color: #5a7fc9; }
+      .closed-banner { background: rgba(224,82,82,0.1); border-color: rgba(224,82,82,0.3); }
+      .closed-banner h3 { color: #fc8181; }
+      .closed-banner p { color: #f87171; }
+      .progress-card { background: #13141a; border-color: rgba(255,255,255,0.07); }
+      .progress-label { color: #6b7280; }
+      .progress-count { color: #fff; }
+      .progress-count span { color: #6b7280; }
+      .bar-bg { background: rgba(255,255,255,0.07); }
+      .progress-notice { color: #6b7280; }
+      .section { background: #13141a; border-color: rgba(255,255,255,0.07); }
+      .section-title { color: #6b7280; border-bottom-color: rgba(255,255,255,0.05); }
+      .label { color: #6b7280; }
+      input[type=text], input[type=email], input[type=tel], select { background: #1c1e27; border-color: rgba(255,255,255,0.13); color: #e8eaf0; }
+      input::placeholder { color: #6b7280; }
+      input:focus, select:focus { border-color: #5a7fc9; background: #1e2030; }
+      select option { background: #1c1e27; }
+      .inline-radio label { color: #e8eaf0; }
+      .legal-box { background: #1c1e27; border-color: rgba(255,255,255,0.07); color: #6b7280; }
+      .legal-box h4 { color: #a0aec0; }
+      .accept-row { color: #e8eaf0; }
+    }
+
+    @media (max-width: 520px) {
+      .row, .row-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="breadcrumb">
+    <a th:href="@{/}">Dashboard</a>
+    <span>&#x203A;</span>
+    <a th:href="@{/members/list}">Members</a>
+    <span>&#x203A;</span>
+    <span>Register</span>
+  </div>
+
+  <!-- Event header - shows current event info -->
+  <div class="event-header" th:if="${registrationOpen}">
+    <div class="event-header-accent"></div>
+    <p class="event-tag">PSU IT Club &nbsp;·&nbsp; Now Open</p>
+    <h1 class="event-title" th:text="${openEvent.eventName}">Video Game Day</h1>
+    <div class="event-meta">
+      <div class="event-meta-row">
+        <span class="event-meta-label">When</span>
+        <span th:text="${openEvent.startTime} + ' – ' + ${openEvent.endTime} + ', ' + ${openEvent.eventDate}">--</span>
+      </div>
+      <div class="event-meta-row">
+        <span class="event-meta-label">Where</span>
+        <span th:text="${openEvent.location}">--</span>
+      </div>
+      <div class="event-meta-row">
+        <span class="event-meta-label">Price</span>
+        <span th:text="'$' + ${openEvent.price} + ' — all proceeds to THON'">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- No open event banner -->
+  <div class="closed-banner" th:unless="${registrationOpen}">
+    <h3>Registration Closed</h3>
+    <p>There are no events currently open for registration. Check back soon!</p>
+  </div>
+
+  <!-- Live registration count -->
+  <div class="progress-card" th:if="${registrationOpen}">
+    <div class="progress-header">
+      <span class="progress-label">Spots filled</span>
+      <span class="progress-count">
+        <th:block th:text="${registeredCount}">0</th:block>
+        <span th:text="' / ' + ${openEvent.capacity}">/ 150</span>
+      </span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fill"
+           th:classappend="${spotsRemaining == 0 ? 'full' : (spotsRemaining <= 10 ? 'almost-full' : '')}"
+           th:style="'width: ' + ${openEvent.capacity > 0 ? (registeredCount * 100 / openEvent.capacity) : 0} + '%'">
+      </div>
+    </div>
+    <p class="progress-notice">
+      <span th:if="${spotsRemaining > 10}" class="spots-remaining" th:text="${spotsRemaining} + ' spots remaining'">-- spots remaining</span>
+      <span th:if="${spotsRemaining > 0 and spotsRemaining <= 10}" class="spots-low" th:text="'Only ' + ${spotsRemaining} + ' spots left!'">-- spots left!</span>
+      <span th:if="${spotsRemaining == 0}" class="spots-none">This event is full.</span>
+    </p>
+  </div>
+
+  <!-- Registration form - only shown when open and spots available -->
+  <form th:action="@{/members/save}" th:object="${member}" method="post"
+        th:if="${registrationOpen and spotsRemaining > 0}">
+    <input type="hidden" th:field="*{memberId}"/>
+
+    <!-- Contact Info -->
+    <div class="section">
+      <p class="section-title">Contact info</p>
+      <div class="field">
+        <label class="label">Email <span class="req">*</span></label>
+        <input type="email" th:field="*{email}" placeholder="your@email.com" required/>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">First name <span class="req">*</span></label>
+          <input type="text" th:field="*{firstName}" placeholder="First name" required/>
+        </div>
+        <div class="field">
+          <label class="label">Last name <span class="req">*</span></label>
+          <input type="text" th:field="*{lastName}" placeholder="Last name" required/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">Username</label>
+          <input type="text" th:field="*{userName}" placeholder="Username"/>
+        </div>
+        <div class="field">
+          <label class="label">Phone number</label>
+          <input type="tel" th:field="*{phoneNumber}" placeholder="Phone number"/>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Address</label>
+        <input type="text" th:field="*{address}" placeholder="Street address"/>
+      </div>
+      <div class="row-3">
+        <div class="field">
+          <label class="label">City</label>
+          <input type="text" th:field="*{city}" placeholder="City"/>
+        </div>
+        <div class="field">
+          <label class="label">State</label>
+          <input type="text" th:field="*{state}" placeholder="State"/>
+        </div>
+        <div class="field">
+          <label class="label">Zip code</label>
+          <input type="text" th:field="*{zipCode}" placeholder="Zip"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- About You -->
+    <div class="section">
+      <p class="section-title">About you</p>
+      <div class="field">
+        <label class="label">Age range <span class="req">*</span></label>
+        <select th:field="*{ageRange}" required>
+          <option value="">Select your age range</option>
+          <option value="4-5">4–5 years old</option>
+          <option value="6-8">6–8 years old</option>
+          <option value="9-11">9–11 years old</option>
+          <option value="12-14">12–14 years old</option>
+          <option value="15-17">15–17 years old</option>
+          <option value="18-21">18–21 years old</option>
+          <option value="22-28">22–28 years old</option>
+          <option value="29+">29 and above</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Guardian's name <span class="req">*</span>
+          <span class="hint">Required if under 18. Type "None" if 18 or older.</span>
+        </label>
+        <input type="text" th:field="*{guardianName}" placeholder="Guardian's full name or None" required/>
+      </div>
+      <div class="field">
+        <label class="label">Guardian's emergency phone <span class="req">*</span>
+          <span class="hint">Required if under 18. Type "None" if 18 or older.</span>
+        </label>
+        <input type="tel" th:field="*{guardianPhone}" placeholder="Phone number or None" required/>
+      </div>
+      <div class="field">
+        <label class="label">What grade/year are you in?</label>
+        <select th:field="*{gradeYear}">
+          <option value="">Select grade/year</option>
+          <option value="8th or below">8th grade or below</option>
+          <option value="9th">9th grade</option>
+          <option value="10th">10th grade</option>
+          <option value="11th">11th grade</option>
+          <option value="12th">12th grade</option>
+          <option value="HS Graduate">High school graduate</option>
+          <option value="College Student">College student</option>
+          <option value="College Graduate">College graduate</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">Are you a college student?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{collegeStudent}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{collegeStudent}" value="no"/> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Interested in attending PSU?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{interestedInPSU}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{interestedInPSU}" value="no"/> No</label>
+            <label><input type="radio" th:field="*{interestedInPSU}" value="maybe"/> Maybe</label>
+            <label><input type="radio" th:field="*{interestedInPSU}" value="current"/> Current student</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gaming -->
+    <div class="section">
+      <p class="section-title">Gaming</p>
+      <div class="field">
+        <label class="label">Favorite game</label>
+        <input type="text" th:field="*{bestGame}" placeholder="e.g. Valorant, Minecraft..."/>
+      </div>
+      <div class="field">
+        <label class="label">Primary gaming system</label>
+        <select th:field="*{gamingSystem}">
+          <option value="">Select platform</option>
+          <option value="PlayStation">PlayStation</option>
+          <option value="Xbox">Xbox</option>
+          <option value="Nintendo">Nintendo</option>
+          <option value="PC">PC</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">Attended VGD before?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{attendedBefore}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{attendedBefore}" value="no"/> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Plan to join a tournament?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{joinTournament}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{joinTournament}" value="no"/> No</label>
+            <label><input type="radio" th:field="*{joinTournament}" value="notsure"/> Not sure</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How did you find us -->
+    <div class="section">
+      <p class="section-title">How did you find us?</p>
+      <div class="field">
+        <select th:field="*{howHeard}">
+          <option value="">Select one</option>
+          <option value="Courier Express">Courier Express</option>
+          <option value="Word of Mouth">Word of mouth</option>
+          <option value="IT Club Email">IT Club email</option>
+          <option value="Flyer/Poster - School">Flyer/Poster – School</option>
+          <option value="Flyer/Poster - Store">Flyer/Poster – Store</option>
+          <option value="Newspaper">Newspaper</option>
+          <option value="IT Club Member">IT Club member</option>
+          <option value="Social Media">Social media</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Terms -->
+    <div class="section">
+      <p class="section-title">Terms &amp; acknowledgment</p>
+      <div class="legal-box">
+        <h4>Responsibility</h4>
+        <p>The IT Club is not responsible for loss or damage of personal property. Enter at your own risk. Players may not modify software or hardware to attain an unfair advantage. No food or drinks in computer labs. The IT Club reserves the right to eject anyone for unwarranted behavior. Refunds will not be given for ejection.</p>
+        <h4>Code of conduct</h4>
+        <p>Participants are subject to Penn State's rules and standards of conduct. Violations or failure to comply with program staff may result in dismissal from the program.</p>
+        <h4>Photo release</h4>
+        <p>By attending this event, you consent to being photographed or filmed for use in Penn State marketing materials.</p>
+        <h4>Food &amp; beverage</h4>
+        <p>Participants receive 2 slices of pizza and 1 Pepsi product or water at 8:00 PM. Contact Jason Long at jel115@psu.edu for dietary concerns.</p>
+        <h4>Liability release</h4>
+        <p>I release and hold harmless The Pennsylvania State University, its trustees, officers, agents, and employees from all claims arising out of participation in Video Game Day.</p>
+        <h4>Title IX</h4>
+        <p>To report sex or gender-based discrimination contact Chris Harris, Title IX Coordinator, cjh41@psu.edu or (814) 863-0471.</p>
+      </div>
+      <label class="accept-row">
+        <input type="checkbox" th:field="*{acceptedTerms}" required/>
+        <span>I accept — by checking this box I am digitally signing and accepting all rules, regulations, and acknowledgments above. <span class="req">*</span></span>
+      </label>
+    </div>
+
+    <button type="submit" class="submit-btn">Submit Registration</button>
+
+  </form>
+
+  <!-- Full event message -->
+  <div class="closed-banner" th:if="${registrationOpen and spotsRemaining == 0}">
+    <h3>Event Full</h3>
+    <p>This event has reached its capacity of <span th:text="${openEvent.capacity}">150</span>. No more registrations are being accepted.</p>
+  </div>
+
+</div>
+</body>
+</html>

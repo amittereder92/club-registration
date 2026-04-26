@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="dark light"/>
+  <title>Member Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      background: #f4f4f7;
+      color: #1a1a2e;
+    }
+
+    .wrap { max-width: 700px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+    /* Breadcrumb */
+    .breadcrumb { font-size: 12px; color: #94a3b8; margin-bottom: 1.5rem; display: flex; gap: 6px; align-items: center; }
+    .breadcrumb a { color: #5a7fc9; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* Header */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid #e2e8f0; }
+    .header-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #5a7fc9; margin-bottom: 3px; }
+    .header-title { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1a1a2e; line-height: 1; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; border-radius: 6px; border: none; cursor: pointer; transition: opacity 0.15s; }
+    .btn-ghost { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-ghost:hover { background: #e2e8f0; }
+    .btn-primary { background: #5a7fc9; color: #fff; }
+    .btn-primary:hover { opacity: 0.85; }
+
+    /* Sections */
+    .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .section-title { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.25rem; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+
+    /* Fields */
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .label { display: block; font-size: 12px; font-weight: 500; color: #475569; margin-bottom: 5px; letter-spacing: 0.3px; }
+    .row   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+
+    input[type=text], input[type=email], input[type=tel], select {
+      width: 100%; padding: 9px 12px; font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      background: #f8fafc; border: 1px solid #cbd5e1;
+      border-radius: 8px; color: #1a1a2e; outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus { border-color: #5a7fc9; background: #fff; }
+    input::placeholder { color: #94a3b8; }
+    select { cursor: pointer; }
+
+    .inline-radio { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; }
+    .inline-radio label { display: flex; align-items: center; gap: 7px; font-size: 14px; color: #1a1a2e; cursor: pointer; }
+    .inline-radio input[type=radio] { margin: 0; width: 15px; height: 15px; accent-color: #5a7fc9; cursor: pointer; }
+
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
+
+    /* ── Dark mode ── */
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b0c10; color: #e8eaf0; }
+
+      .breadcrumb { color: #6b7280; }
+      .breadcrumb a { color: #5a7fc9; }
+
+      .page-header { border-bottom-color: rgba(255,255,255,0.07); }
+      .header-title { color: #fff; }
+
+      .btn-ghost { background: #1c1e27; color: #a0aec0; border-color: rgba(255,255,255,0.1); }
+      .btn-ghost:hover { background: #252730; }
+
+      .section { background: #13141a; border-color: rgba(255,255,255,0.07); }
+      .section-title { color: #6b7280; border-bottom-color: rgba(255,255,255,0.05); }
+      .label { color: #6b7280; }
+
+      input[type=text], input[type=email], input[type=tel], select {
+        background: #1c1e27; border-color: rgba(255,255,255,0.13); color: #e8eaf0;
+      }
+      input::placeholder { color: #6b7280; }
+      input:focus, select:focus { border-color: #5a7fc9; background: #1e2030; }
+      select option { background: #1c1e27; }
+
+      .inline-radio label { color: #e8eaf0; }
+    }
+
+    @media (max-width: 520px) {
+      .row, .row-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a th:href="@{/}">Dashboard</a>
+    <span>&#x203A;</span>
+    <a th:href="@{/members/list}">Members</a>
+    <span>&#x203A;</span>
+    <span th:text="${member.memberId == 0 ? 'Add Member' : 'Edit Member'}">Member</span>
+  </div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <p class="header-tag">PSU IT Club</p>
+      <h1 class="header-title" th:text="${member.memberId == 0 ? 'Add Member' : 'Edit Member'}">Member</h1>
+    </div>
+    <a th:href="@{/members/list}" class="btn btn-ghost">&#x2190; Back</a>
+  </div>
+
+  <form th:action="@{/members/save}" th:object="${member}" method="post">
+    <input type="hidden" th:field="*{memberId}"/>
+
+    <!-- Basic Info -->
+    <div class="section">
+      <p class="section-title">Basic info</p>
+      <div class="field">
+        <label class="label">Email</label>
+        <input type="email" th:field="*{email}" placeholder="email@example.com"/>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">First name</label>
+          <input type="text" th:field="*{firstName}" placeholder="First name"/>
+        </div>
+        <div class="field">
+          <label class="label">Last name</label>
+          <input type="text" th:field="*{lastName}" placeholder="Last name"/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">Username</label>
+          <input type="text" th:field="*{userName}" placeholder="Username"/>
+        </div>
+        <div class="field">
+          <label class="label">Phone number</label>
+          <input type="tel" th:field="*{phoneNumber}" placeholder="Phone number"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="section">
+      <p class="section-title">Address</p>
+      <div class="field">
+        <label class="label">Street address</label>
+        <input type="text" th:field="*{address}" placeholder="Street address"/>
+      </div>
+      <div class="row-3">
+        <div class="field">
+          <label class="label">City</label>
+          <input type="text" th:field="*{city}" placeholder="City"/>
+        </div>
+        <div class="field">
+          <label class="label">State</label>
+          <input type="text" th:field="*{state}" placeholder="State"/>
+        </div>
+        <div class="field">
+          <label class="label">Zip code</label>
+          <input type="text" th:field="*{zipCode}" placeholder="Zip"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="section">
+      <p class="section-title">About</p>
+      <div class="field">
+        <label class="label">Age range</label>
+        <select th:field="*{ageRange}">
+          <option value="">Select age range</option>
+          <option value="4-5">4–5 years old</option>
+          <option value="6-8">6–8 years old</option>
+          <option value="9-11">9–11 years old</option>
+          <option value="12-14">12–14 years old</option>
+          <option value="15-17">15–17 years old</option>
+          <option value="18-21">18–21 years old</option>
+          <option value="22-28">22–28 years old</option>
+          <option value="29+">29 and above</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">Guardian's name</label>
+          <input type="text" th:field="*{guardianName}" placeholder="Guardian name or None"/>
+        </div>
+        <div class="field">
+          <label class="label">Guardian's phone</label>
+          <input type="tel" th:field="*{guardianPhone}" placeholder="Guardian phone or None"/>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Grade/year</label>
+        <select th:field="*{gradeYear}">
+          <option value="">Select grade/year</option>
+          <option value="8th or below">8th grade or below</option>
+          <option value="9th">9th grade</option>
+          <option value="10th">10th grade</option>
+          <option value="11th">11th grade</option>
+          <option value="12th">12th grade</option>
+          <option value="HS Graduate">High school graduate</option>
+          <option value="College Student">College student</option>
+          <option value="College Graduate">College graduate</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">College student?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{collegeStudent}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{collegeStudent}" value="no"/> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Interested in PSU?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{interestedInPSU}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{interestedInPSU}" value="no"/> No</label>
+            <label><input type="radio" th:field="*{interestedInPSU}" value="maybe"/> Maybe</label>
+            <label><input type="radio" th:field="*{interestedInPSU}" value="current"/> Current</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gaming -->
+    <div class="section">
+      <p class="section-title">Gaming</p>
+      <div class="row">
+        <div class="field">
+          <label class="label">Favorite game</label>
+          <input type="text" th:field="*{bestGame}" placeholder="e.g. Valorant"/>
+        </div>
+        <div class="field">
+          <label class="label">Primary system</label>
+          <select th:field="*{gamingSystem}">
+            <option value="">Select platform</option>
+            <option value="PlayStation">PlayStation</option>
+            <option value="Xbox">Xbox</option>
+            <option value="Nintendo">Nintendo</option>
+            <option value="PC">PC</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label class="label">Attended VGD before?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{attendedBefore}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{attendedBefore}" value="no"/> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Join tournament?</label>
+          <div class="inline-radio">
+            <label><input type="radio" th:field="*{joinTournament}" value="yes"/> Yes</label>
+            <label><input type="radio" th:field="*{joinTournament}" value="no"/> No</label>
+            <label><input type="radio" th:field="*{joinTournament}" value="notsure"/> Not sure</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Misc -->
+    <div class="section">
+      <p class="section-title">Misc</p>
+      <div class="field">
+        <label class="label">How did they hear about us?</label>
+        <select th:field="*{howHeard}">
+          <option value="">Select one</option>
+          <option value="Courier Express">Courier Express</option>
+          <option value="Word of Mouth">Word of mouth</option>
+          <option value="IT Club Email">IT Club email</option>
+          <option value="Flyer/Poster - School">Flyer/Poster – School</option>
+          <option value="Flyer/Poster - Store">Flyer/Poster – Store</option>
+          <option value="Newspaper">Newspaper</option>
+          <option value="IT Club Member">IT Club member</option>
+          <option value="Social Media">Social media</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <a th:href="@{/members/list}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary">Save Member</button>
+    </div>
+
+  </form>
+</div>
+</body>
+</html>

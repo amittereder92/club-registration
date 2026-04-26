@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="dark light"/>
+  <title>Event Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: 'DM Sans', sans-serif; font-size: 14px; background: #f4f4f7; color: #1a1a2e; }
+
+    .wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+    .breadcrumb { font-size: 12px; color: #94a3b8; margin-bottom: 1.5rem; display: flex; gap: 6px; align-items: center; }
+    .breadcrumb a { color: #5a7fc9; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid #e2e8f0; }
+    .header-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #5a7fc9; margin-bottom: 3px; }
+    .header-title { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1a1a2e; line-height: 1; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; border-radius: 6px; border: none; cursor: pointer; transition: opacity 0.15s; }
+    .btn-ghost { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-ghost:hover { background: #e2e8f0; }
+    .btn-primary { background: #5a7fc9; color: #fff; }
+    .btn-primary:hover { opacity: 0.85; }
+
+    .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+    .section-title { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.25rem; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+    .label { display: block; font-size: 12px; font-weight: 500; color: #475569; margin-bottom: 5px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    input[type=text], input[type=date], input[type=number], select, textarea {
+      width: 100%; padding: 9px 12px; font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      background: #f8fafc; border: 1px solid #cbd5e1;
+      border-radius: 8px; color: #1a1a2e; outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #5a7fc9; background: #fff; }
+    input::placeholder, textarea::placeholder { color: #94a3b8; }
+    textarea { resize: vertical; min-height: 80px; }
+    select { cursor: pointer; }
+
+    .toggle-row { display: flex; align-items: center; gap: 10px; }
+    .toggle-label { font-size: 14px; color: #1a1a2e; }
+    input[type=checkbox] { width: 16px; height: 16px; accent-color: #5a7fc9; cursor: pointer; }
+
+    .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b0c10; color: #e8eaf0; }
+      .breadcrumb { color: #6b7280; }
+      .breadcrumb a { color: #5a7fc9; }
+      .page-header { border-bottom-color: rgba(255,255,255,0.07); }
+      .header-title { color: #fff; }
+      .btn-ghost { background: #1c1e27; color: #a0aec0; border-color: rgba(255,255,255,0.1); }
+      .btn-ghost:hover { background: #252730; }
+      .section { background: #13141a; border-color: rgba(255,255,255,0.07); }
+      .section-title { color: #6b7280; border-bottom-color: rgba(255,255,255,0.05); }
+      .label { color: #6b7280; }
+      .toggle-label { color: #e8eaf0; }
+      input[type=text], input[type=date], input[type=number], select, textarea {
+        background: #1c1e27; border-color: rgba(255,255,255,0.13); color: #e8eaf0;
+      }
+      input::placeholder, textarea::placeholder { color: #6b7280; }
+      input:focus, select:focus, textarea:focus { border-color: #5a7fc9; background: #1e2030; }
+      select option { background: #1c1e27; }
+    }
+
+    @media (max-width: 520px) {
+      .row, .row-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="breadcrumb">
+    <a th:href="@{/}">Dashboard</a>
+    <span>&#x203A;</span>
+    <a th:href="@{/events/list}">Events</a>
+    <span>&#x203A;</span>
+    <span th:text="${event.eventId == 0 ? 'New Event' : 'Edit Event'}">Event</span>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <p class="header-tag">PSU IT Club</p>
+      <h1 class="header-title" th:text="${event.eventId == 0 ? 'New Event' : 'Edit Event'}">Event</h1>
+    </div>
+    <a th:href="@{/events/list}" class="btn btn-ghost">&#x2190; Back</a>
+  </div>
+
+  <form th:action="@{/events/save}" th:object="${event}" method="post">
+    <input type="hidden" th:field="*{eventId}"/>
+
+    <!-- Event Details -->
+    <div class="section">
+      <p class="section-title">Event details</p>
+
+      <div class="field">
+        <label class="label">Event name</label>
+        <input type="text" th:field="*{eventName}" placeholder="e.g. VGD Fall 2025" required/>
+      </div>
+
+      <div class="field">
+        <label class="label">Description</label>
+        <textarea th:field="*{description}" placeholder="Brief description of the event..."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Location</label>
+        <input type="text" th:field="*{location}" placeholder="e.g. DEF Building, 1 College Place, DuBois PA 15801"/>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="label">Event date</label>
+          <input type="date" th:field="*{eventDate}"/>
+        </div>
+        <div class="field">
+          <label class="label">Capacity</label>
+          <input type="number" th:field="*{capacity}" placeholder="150" min="1"/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="label">Start time</label>
+          <input type="text" th:field="*{startTime}" placeholder="e.g. 4:00 PM"/>
+        </div>
+        <div class="field">
+          <label class="label">End time</label>
+          <input type="text" th:field="*{endTime}" placeholder="e.g. 11:00 PM"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Price ($)</label>
+        <input type="number" th:field="*{price}" placeholder="5.00" min="0" step="0.01"/>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="section">
+      <p class="section-title">Settings</p>
+      <div class="toggle-row">
+        <input type="checkbox" th:field="*{active}" id="isActiveCheck"/>
+        <label class="toggle-label" for="isActiveCheck">Active — open for registration</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a th:href="@{/events/list}" class="btn btn-ghost">Cancel</a>
+      <button type="submit" class="btn btn-primary">Save Event</button>
+    </div>
+
+  </form>
+</div>
+</body>
+</html>

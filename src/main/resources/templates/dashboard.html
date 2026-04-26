@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VGD Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0b0c10;
+      --surface:  #13141a;
+      --surface2: #1c1e27;
+      --border:   rgba(255,255,255,0.07);
+      --accent:   #5a7fc9;
+      --accent2:  #1d9e75;
+      --accent3:  #c9855a;
+      --text:     #e8eaf0;
+      --muted:    #6b7280;
+      --grid-color: rgba(255,255,255,0.03);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ── Header ── */
+    .dash-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 3rem; padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.5s ease both;
+    }
+    .dash-logo { display: flex; flex-direction: column; gap: 4px; }
+    .dash-logo-tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+    .dash-logo-title { font-family: 'Rajdhani', sans-serif; font-size: 38px; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; line-height: 1; }
+    .dash-logo-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .dash-logout { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; text-decoration: none; transition: color 0.15s, border-color 0.15s; }
+    .dash-logout:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    /* ── Stat cards ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.25rem 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    }
+    .stat-card.blue::before  { background: var(--accent); }
+    .stat-card.green::before { background: var(--accent2); }
+    .stat-card.amber::before { background: var(--accent3); }
+    .stat-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .stat-value { font-family: 'Rajdhani', sans-serif; font-size: 40px; font-weight: 700; line-height: 1; color: #fff; }
+    .stat-desc { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    /* ── Nav cards ── */
+    .nav-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+    .nav-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 2rem 1.5rem;
+      text-decoration: none; color: var(--text);
+      display: flex; flex-direction: column; gap: 12px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .nav-card:hover { background: var(--surface2); border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+    .nav-card-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .nav-card-icon.blue  { background: rgba(90,127,201,0.15); }
+    .nav-card-icon.green { background: rgba(29,158,117,0.15); }
+    .nav-card-icon.amber { background: rgba(201,133,90,0.15); }
+    .nav-card-title { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
+    .nav-card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .nav-card-arrow { margin-top: auto; font-size: 18px; color: var(--muted); transition: color 0.15s, transform 0.15s; }
+    .nav-card:hover .nav-card-arrow { color: var(--text); transform: translateX(4px); }
+
+    /* ── Quick actions ── */
+    .section-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; animation: fadeUp 0.5s 0.3s ease both; }
+    .actions-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+      animation: fadeUp 0.5s 0.35s ease both;
+    }
+    .action-btn {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.25rem;
+      text-decoration: none; color: var(--text);
+      font-size: 14px; font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .action-btn:hover { background: var(--surface2); border-color: rgba(255,255,255,0.15); }
+    .action-btn-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .action-btn-dot.blue  { background: var(--accent); }
+    .action-btn-dot.green { background: var(--accent2); }
+    .action-btn-dot.amber { background: var(--accent3); }
+    .action-btn-dot.red   { background: #e05252; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .stats-grid, .nav-grid { grid-template-columns: 1fr; }
+      .actions-grid { grid-template-columns: 1fr; }
+      .dash-header { flex-direction: column; gap: 1rem; }
+      .dash-logo-title { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div class="dash-logo">
+      <span class="dash-logo-tag">PSU IT Club</span>
+      <h1 class="dash-logo-title">VGD Dashboard</h1>
+      <p class="dash-logo-sub">Video Game Day &nbsp;·&nbsp; Admin Panel</p>
+    </div>
+    <a th:href="@{/logout}" class="dash-logout">
+      &#x2192; Sign out
+    </a>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stats-grid">
+    <div class="stat-card blue">
+      <p class="stat-label">Total Members</p>
+      <p class="stat-value" th:text="${totalMembers}">0</p>
+      <p class="stat-desc">Registered in the system</p>
+    </div>
+    <div class="stat-card green">
+      <p class="stat-label">Active Events</p>
+      <p class="stat-value" th:text="${activeEvents}">0</p>
+      <p class="stat-desc">Currently open for registration</p>
+    </div>
+    <div class="stat-card amber">
+      <p class="stat-label">Total Events</p>
+      <p class="stat-value" th:text="${totalEvents}">0</p>
+      <p class="stat-desc">All time events</p>
+    </div>
+  </div>
+
+  <!-- Nav cards -->
+  <div class="nav-grid">
+    <a th:href="@{/members/list}" class="nav-card">
+      <div class="nav-card-icon blue">&#x1F465;</div>
+      <p class="nav-card-title">Members</p>
+      <p class="nav-card-desc">View, search, edit, and manage all club members.</p>
+      <span class="nav-card-arrow">&#x2192;</span>
+    </a>
+    <a th:href="@{/events/list}" class="nav-card">
+      <div class="nav-card-icon green">&#x1F3AE;</div>
+      <p class="nav-card-title">Events</p>
+      <p class="nav-card-desc">Manage Video Game Day events and view registrations per event.</p>
+      <span class="nav-card-arrow">&#x2192;</span>
+    </a>
+    <a th:href="@{/members/register}" class="nav-card">
+      <div class="nav-card-icon amber">&#x270F;</div>
+      <p class="nav-card-title">Register</p>
+      <p class="nav-card-desc">Public registration form for new and returning members.</p>
+      <span class="nav-card-arrow">&#x2192;</span>
+    </a>
+  </div>
+
+  <!-- Quick actions -->
+  <p class="section-label">Quick Actions</p>
+  <div class="actions-grid">
+    <a th:href="@{/members/list}" class="action-btn">
+      <span class="action-btn-dot blue"></span>
+      View all members
+    </a>
+    <a th:href="@{/events/list}" class="action-btn">
+      <span class="action-btn-dot green"></span>
+      View all events
+    </a>
+    <a th:href="@{/members/register}" class="action-btn">
+      <span class="action-btn-dot amber"></span>
+      Register for an event
+    </a>
+    <a th:href="@{/logout}" class="action-btn">
+      <span class="action-btn-dot red"></span>
+      Sign out
+    </a>
+  </div>
+
+</div>
+</body>
+</html>
