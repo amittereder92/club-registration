@@ -53,16 +53,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findByIsActiveTrueOrderByEventDateAsc();
     }
 
-    /**
-     * Returns the single event that is currently open for registration.
-     * Rules:
-     *  - The event date must be today or in the future (not yet passed)
-     *  - Among all qualifying events, the one with the nearest upcoming date is chosen
-     *  - If the previous event's date was yesterday or earlier, it is excluded
-     *
-     * This means only ONE event is open at a time, and the next one
-     * opens automatically the day after the previous event's date.
-     */
+    // Check current available event
     @Override
     public Optional<Event> findCurrentlyOpenEvent() {
         LocalDate today = LocalDate.now();
@@ -74,11 +65,6 @@ public class EventServiceImpl implements EventService {
                 .min(Comparator.comparing(Event::getEventDate)); // pick the nearest upcoming one
     }
 
-    /**
-     * Checks if a specific event is currently open for registration.
-     * An event is open if its date is today or in the future,
-     * AND it is the next upcoming event.
-     */
     @Override
     public boolean isEventOpenForRegistration(int eventId) {
         Optional<Event> openEvent = findCurrentlyOpenEvent();

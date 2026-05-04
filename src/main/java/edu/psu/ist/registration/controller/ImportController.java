@@ -44,9 +44,7 @@ public class ImportController {
         registrationRepository = theRegistrationRepository;
     }
 
-    // ─────────────────────────────────────────
     // IMPORT MEMBERS ONLY
-    // ─────────────────────────────────────────
     @PostMapping("/members")
     public String importMembers(@RequestParam("file") MultipartFile file,
                                 RedirectAttributes redirectAttributes) {
@@ -71,9 +69,7 @@ public class ImportController {
         return "redirect:/members/list";
     }
 
-    // ─────────────────────────────────────────
     // IMPORT & REGISTER FOR A SPECIFIC EVENT
-    // ─────────────────────────────────────────
     @PostMapping("/event-members")
     public String importForEvent(@RequestParam("file") MultipartFile file,
                                  @RequestParam("eventId") int eventId,
@@ -135,9 +131,7 @@ public class ImportController {
         return redirectUrl;
     }
 
-    // ─────────────────────────────────────────
     // FILE ROUTING
-    // ─────────────────────────────────────────
     private List<Member> parseFile(MultipartFile file) throws Exception {
         String name = file.getOriginalFilename();
         if (name == null) throw new Exception("Invalid filename.");
@@ -147,10 +141,7 @@ public class ImportController {
         throw new Exception("Unsupported file type. Use .xlsx, .xls, or .csv.");
     }
 
-    // ─────────────────────────────────────────
     // EXCEL PARSER
-    // Uses ByteArrayInputStream to ensure POI gets a fully buffered stream
-    // ─────────────────────────────────────────
     private List<Member> parseExcel(MultipartFile file, boolean legacy) throws Exception {
         List<Member> members = new ArrayList<>();
 
@@ -241,9 +232,7 @@ public class ImportController {
         return (val == null || val.isBlank()) ? null : val.trim();
     }
 
-    // ─────────────────────────────────────────
     // CSV PARSER
-    // ─────────────────────────────────────────
     private List<Member> parseCsv(MultipartFile file) throws Exception {
         List<Member> members = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {

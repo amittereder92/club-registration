@@ -35,21 +35,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    /**
-     * Save a member with email duplicate protection.
-     *
-     * Rules:
-     * - If this is a NEW member (memberId == 0) and the email already exists:
-     *     → Find the existing member and update their non-identifying fields.
-     *     → Leave firstName, lastName, userName untouched.
-     *     → Return the updated existing member.
-     *
-     * - If this is an EDIT (memberId != 0):
-     *     → Save normally (admin is intentionally editing a specific record).
-     *
-     * - If email is blank or not a duplicate:
-     *     → Save normally.
-     */
+ 
     @Override
     @Transactional
     public Member save(Member theMember) {
@@ -63,7 +49,7 @@ public class MemberServiceImpl implements MemberService {
             if (existing.isPresent()) {
                 Member existingMember = existing.get();
 
-                // Preserve identity fields — do NOT overwrite these
+                // Preserve identity fields — does NOT overwrite these
                 // existingMember.firstName stays
                 // existingMember.lastName stays
                 // existingMember.userName stays

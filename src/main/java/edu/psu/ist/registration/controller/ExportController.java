@@ -34,9 +34,7 @@ public class ExportController {
         registrationRepository = theRegistrationRepository;
     }
 
-    // ─────────────────────────────────────────
     // Export ALL members
-    // ─────────────────────────────────────────
     @GetMapping("/members")
     public void exportAllMembers(HttpServletResponse response) throws IOException {
 
@@ -103,9 +101,7 @@ public class ExportController {
         }
     }
 
-    // ─────────────────────────────────────────
     // Export members registered for a specific event
-    // ─────────────────────────────────────────
     @GetMapping("/event")
     public void exportEventRegistrations(@RequestParam("eventId") int eventId,
                                          HttpServletResponse response) throws IOException {
@@ -171,9 +167,7 @@ public class ExportController {
         }
     }
 
-    // ─────────────────────────────────────────
     // Helpers
-    // ─────────────────────────────────────────
     private String nullSafe(String value) {
         return value != null ? value : "";
     }
