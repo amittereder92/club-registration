@@ -3,6 +3,7 @@ package edu.psu.ist.registration.controller;
 import edu.psu.ist.registration.dao.RegistrationRepository;
 import edu.psu.ist.registration.entity.Event;
 import edu.psu.ist.registration.entity.Member;
+import edu.psu.ist.registration.entity.Registration;
 import edu.psu.ist.registration.service.EventService;
 import edu.psu.ist.registration.service.MemberService;
 
@@ -44,8 +45,7 @@ public class MemberController {
 
     @GetMapping("/showFormForAdd")
     public String showFormForAdd(Model theModel) {
-        Member theMember = new Member();
-        theModel.addAttribute("member", theMember);
+        theModel.addAttribute("member", new Member());
         return "members/member-form";
     }
 
@@ -72,7 +72,6 @@ public class MemberController {
     public String showRegistrationForm(Model theModel) {
         theModel.addAttribute("member", new Member());
 
-        // Find the currently open event and its registration count
         Optional<Event> openEvent = eventService.findCurrentlyOpenEvent();
         if (openEvent.isPresent()) {
             Event event = openEvent.get();
@@ -91,5 +90,33 @@ public class MemberController {
         }
 
         return "vgd-registration";
+    }
+
+    @PostMapping("/register")
+    public String submitRegistration(@ModelAttribute("member") Member theMember, Model theModel) {
+
+        // Save (or merge if duplicate email) the member
+        Member savedMember = memberService.save(theMember);
+
+        // Auto-register for the currently open event if one exists
+        Optional<Event> openEvent = eventService.findCurrentlyOpenEvent();
+        if (openEvent.isPresent()) {
+            Event event = openEvent.get();
+
+            // Check capacity
+            int currentCount = registrationRepository.countByEvent_EventId(event.getEventId());
+            if (currentCount < event.getCapacity()) {
+
+                // Only register if not already registered
+                Optional<Registration> existing = registrationRepository
+                        .findByMember_MemberIdAndEvent_EventId(
+                                savedMember.getMemberId(), event.getEventId());
+                if (existing.isEmpty()) {
+                    registrationRepository.save(new Registration(savedMember, event));
+                }
+            }
+        }
+
+        return "redirect:/members/list";
     }
 }

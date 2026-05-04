@@ -179,7 +179,7 @@
   </div>
 
   <!-- Registration form - only shown when open and spots available -->
-  <form th:action="@{/members/save}" th:object="${member}" method="post"
+  <form th:action="@{/members/register}" th:object="${member}" method="post"
         th:if="${registrationOpen and spotsRemaining > 0}">
     <input type="hidden" th:field="*{memberId}"/>
 
